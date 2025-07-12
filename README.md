@@ -37,7 +37,23 @@ ComfyUI's custom node package. This custom node has many practical functions, in
 ><img width="721" height="409" alt="image" src="https://github.com/user-attachments/assets/c49fc13b-be0c-4a5c-a9c1-c4e0034e3880" />
 >
 > </details> 
-  
-  
-
-  
+### Inversed Switch
+> Used to control the direction of the workflow.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Connect the main workflow to the `Input` interface, then connect the `Output` to different branch workflows. By controlling the `path` value of the node, you can determine which branch the workflow will take.
+> - This node needs to be used in conjunction with `Switch`.
+><img width="4507" height="2165" alt="workflow" src="https://github.com/user-attachments/assets/9a0cc5fe-e7fb-46c7-8751-4a11445433a3" />
+>
+> </details> 
+### Switch
+> Select and retrieve data from different processes.
+> <details>
+> <summary>See More Information</summary>
+>
+> - This node is usually used in conjunction with the `Inversed Switch` node; of course, you can also use it independently.
+> - The `Input` interface connects to different branch workflows, while the `Output` interface will output data from the corresponding workflow based on the value of `path`.
+><img width="1088" height="471" alt="image" src="https://github.com/user-attachments/assets/3a228452-94fa-4cee-b558-d2ccf2ca4ffa" />
+>
+> </details> 
