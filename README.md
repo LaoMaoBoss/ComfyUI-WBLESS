@@ -44,6 +44,7 @@ ComfyUI's custom node package. This custom node has many practical functions, in
 >
 > - Connect the main workflow to the `Input` interface, then connect the `Output` to different branch workflows. By controlling the `path` value of the node, you can determine which branch the workflow will take.
 > - This node needs to be used in conjunction with `Switch`.
+> - The core logic of this node draws inspiration from [ComfyUI-Impact-Pack](https://github.com/ltdrdata/ComfyUI-Impact-Pack?tab=readme-ov-file). We would like to express our gratitude to the author of `ComfyUI-Impact-Pack` here.
 ><img width="4507" height="2165" alt="workflow" src="https://github.com/user-attachments/assets/9a0cc5fe-e7fb-46c7-8751-4a11445433a3" />
 >
 > </details> 
