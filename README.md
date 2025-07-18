@@ -58,3 +58,31 @@ ComfyUI's custom node package. This custom node has many practical functions, in
 ><img width="1088" height="471" alt="image" src="https://github.com/user-attachments/assets/3a228452-94fa-4cee-b558-d2ccf2ca4ffa" />
 >
 > </details> 
+### Dominant Axis Scale
+> Smart scale input group A relative to input group B, using its longest side as the scaling axis.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Height a, Width a — these are the input dimensions you need to scale.
+> - Height b, Width b — these reference dimensions serve as the scaling baseline, which you can conceptualize as canvas dimensions.
+> - ratio — Input your scaling factor here.
+> - The output Width, Height, and scale_ratio govern different output formats.
+><img width="3303" height="1224" alt="workflow (1)" src="https://github.com/user-attachments/assets/8c286089-8346-47e1-94a4-f757997d0e9a" />
+>
+> </details>
+### Get Image Size
+> Get Image Dimensions.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="509" height="348" alt="image" src="https://github.com/user-attachments/assets/0f2121c4-0641-4fb2-aaaf-48fac71d0fbb" />
+>
+> </details>
+### Get Mask Size
+> Get Mask Dimensions.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="757" height="527" alt="image" src="https://github.com/user-attachments/assets/935a2181-1113-4217-aa2c-eb11340463bf" />
+>
+> </details> 
