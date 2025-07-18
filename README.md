@@ -1,5 +1,5 @@
 # ComfyUI-WBLESS
-ComfyUI's custom node package. This custom node has many practical functions, including global variables and process flow control.
+ComfyUI custom node package. This custom node features multiple practical functions, including global variables, flow control, obtaining image or mask dimensions, and Dominant Axis Scale.
 # Get Started
 ### Recommended
 - Install via [ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI-Manager).
