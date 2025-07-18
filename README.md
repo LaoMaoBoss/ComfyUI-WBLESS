@@ -11,7 +11,9 @@ ComfyUI's custom node package. This custom node has many practical functions, in
    ```
 - Start up ComfyUI.
 # NOTICE
-- V2.0 is released. This is the first public version. Version 1.0 is an internal test version and will not be made public.
+- V2.1.1 Fixed the Get Mask Size node returning wrong dimensions in certain scenarios.
+- V2.1.0 Updated the Dominant Axis Scale, Get Image Size, and Get Mask Size nodes.
+- V2.0.0 is released. This is the first public version. Version 1.0 is an internal test version and will not be made public.
 # The Nodes
 ### Set Global Variable
 > The `Set Global Variable` node allows you to store your data in variables.
