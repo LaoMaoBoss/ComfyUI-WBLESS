@@ -48,13 +48,26 @@ class GetMaskSize(CozyBaseNode):
                 return (0, 0)
             mask = mask[0]
 
-        if not torch.any(mask > 0):
+        threshold = 0.01
+        
+        if not torch.any(mask > threshold):
             return (0, 0)
 
-        nonzero_indices = torch.nonzero(mask, as_tuple=False)
+        nonzero_indices = torch.nonzero(mask > threshold, as_tuple=False)
 
-        y_indices = nonzero_indices[:, 1]
-        x_indices = nonzero_indices[:, 2]
+        dim = mask.dim()
+        if dim == 3:
+            y_indices = nonzero_indices[:, 1]
+            x_indices = nonzero_indices[:, 2]
+        elif dim == 4:
+            if mask.shape[1] == 1:
+                y_indices = nonzero_indices[:, 2]
+                x_indices = nonzero_indices[:, 3]
+            else:
+                y_indices = nonzero_indices[:, 1]
+                x_indices = nonzero_indices[:, 2]
+        else:
+            return (0, 0)
 
         y_min, y_max = y_indices.min(), y_indices.max()
         x_min, x_max = x_indices.min(), x_indices.max()
