@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.1.2 Import the cozy_comfyui module and fix the issue where users cannot import the cozy_comfyui module.
 - V2.1.1 Fixed the Get Mask Size node returning wrong dimensions in certain scenarios.
 - V2.1.0 Updated the Dominant Axis Scale, Get Image Size, and Get Mask Size nodes.
 - V2.0.0 is released. This is the first public version. Version 1.0 is an internal test version and will not be made public.
