@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.2.0 Update the Area Based Scale Node.
 - V2.1.2 Import the cozy_comfyui module and fix the issue where users cannot import the cozy_comfyui module.
 - V2.1.1 Fixed the Get Mask Size node returning wrong dimensions in certain scenarios.
 - V2.1.0 Updated the Dominant Axis Scale, Get Image Size, and Get Mask Size nodes.
@@ -71,6 +72,20 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - ratio — Input your scaling factor here.
 > - The output Width, Height, and scale_ratio govern different output formats.
 ><img width="3303" height="1224" alt="workflow (1)" src="https://github.com/user-attachments/assets/8c286089-8346-47e1-94a4-f757997d0e9a" />
+>
+> </details>
+### Area Based Scale
+> Smart scale the area of input group A with reference to the area of input group B.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Height a, Width a — these are the input dimensions you need to scale.
+> - Height b, Width b — these reference dimensions serve as the scaling baseline, which you can conceptualize as canvas dimensions.
+> - ratio — Input your scaling factor here.
+> - The output Width, Height, and scale_ratio govern different output formats.
+> - cap_threshold — the upper scaling limit threshold, beyond which the object will not scale any.
+> - enable_cap — threshold activation switch.
+><img width="3467" height="1237" alt="Area_Based_Scale_demo" src="https://github.com/user-attachments/assets/8b257d09-aea3-4f03-bd5c-d148cd8832c3" />
 >
 > </details>
 ### Get Image Size
