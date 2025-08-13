@@ -1,4 +1,3 @@
-'''
 import execution
 import nodes
 from cozy_comfyui.node import CozyBaseNode, COZY_TYPE_ANY
@@ -123,4 +122,3 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Inversed Switch": "Inversed Switch",
     "Switch": "Switch"
 }
-'''
