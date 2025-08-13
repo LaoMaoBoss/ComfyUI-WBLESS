@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.2.2 Update the Overlay Text and Text Block nodes.
 - V2.2.0 Update the Area Based Scale Node.
 - V2.1.2 Import the cozy_comfyui module and fix the issue where users cannot import the cozy_comfyui module.
 - V2.1.1 Fixed the Get Mask Size node returning wrong dimensions in certain scenarios.
@@ -104,3 +105,12 @@ ComfyUI custom node package. This custom node features multiple practical functi
 ><img width="757" height="527" alt="image" src="https://github.com/user-attachments/assets/935a2181-1113-4217-aa2c-eb11340463bf" />
 >
 > </details> 
+### Overlay Text & Text Block
+> The function of drawing text on images consists of two nodes: a parent node and a child node. The parent node is `Overlay Text`, which is used to control the overall settings, while the child node is `Text Block`, responsible for controlling individual text blocks. These two nodes work together to build a powerful text system with professional-level text adjustment functions.
+> <details>
+> <summary>See More Information</summary>
+>
+> - The `text_block` input of `Overlay Text` is used to connect `text blocks`. If multiple styles need to be controlled separately, connect multiple `text blocks`.
+><img width="2543" height="2032" alt="workflow (4)" src="https://github.com/user-attachments/assets/bfb779b7-fe4e-4a84-956e-2c18db2af401" />
+>
+> </details>
