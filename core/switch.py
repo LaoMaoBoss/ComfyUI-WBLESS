@@ -18,6 +18,9 @@ def is_execution_blocked(values):
 _original_get_output_data = execution.get_output_data
 
 def _hooked_get_output_data(obj, input_data_all, *args, **kwargs):
+    if not isinstance(input_data_all, dict):
+        return _original_get_output_data(obj, input_data_all, *args, **kwargs)
+    
     if isinstance(obj, Switch):
         path_list = input_data_all.get("Path")
         
