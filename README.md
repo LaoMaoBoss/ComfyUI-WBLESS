@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.2.3 Fix switch node runtime errors in certain environments.
 - V2.2.2 Update the Overlay Text and Text Block nodes.
 - V2.2.0 Update the Area Based Scale Node.
 - V2.1.2 Import the cozy_comfyui module and fix the issue where users cannot import the cozy_comfyui module.
