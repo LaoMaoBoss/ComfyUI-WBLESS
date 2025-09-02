@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.3.0 Add Gradient Node.
 - V2.2.4 Fix the adaptation of the switch series nodes in the new version of ComfyUI.
 - V2.2.3 Fix switch node runtime errors in certain environments.
 - V2.2.2 Update the Overlay Text and Text Block nodes.
@@ -114,5 +115,19 @@ ComfyUI custom node package. This custom node features multiple practical functi
 >
 > - The `text_block` input of `Overlay Text` is used to connect `text blocks`. If multiple styles need to be controlled separately, connect multiple `text blocks`.
 ><img width="2543" height="2032" alt="workflow (4)" src="https://github.com/user-attachments/assets/bfb779b7-fe4e-4a84-956e-2c18db2af401" />
+>
+> </details>
+### Gradient
+> Used to generate `gradients` or `transparent gradients` for images.
+> <details>
+> <summary>See More Information</summary>
+>
+> - `gradient_type` is used to set the gradient style.
+> - `rotation_angle` is used to set the gradient direction.
+> - The `position` series settings are used to control the gradient effect in detail.
+> - The `color` series settings are used to set gradient colors.
+> - The `alpha` series settings are used to set gradient transparency
+> - The `mask` output port will output the corresponding `mask` based on the transparent gradient
+><img width="1431" height="927" alt="workflow" src="https://github.com/user-attachments/assets/0cc2c934-1faf-4495-a521-6873d5b7c00a" />
 >
 > </details>
