@@ -126,8 +126,8 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - `rotation_angle` is used to set the gradient direction.
 > - The `position` series settings are used to control the gradient effect in detail.
 > - The `color` series settings are used to set gradient colors.
-> - The `alpha` series settings are used to set gradient transparency
-> - The `mask` output port will output the corresponding `mask` based on the transparent gradient
+> - The `alpha` series settings are used to set gradient transparency.
+> - The `mask` output port will output the corresponding `mask` based on the transparent gradient.
 ><img width="1431" height="927" alt="workflow" src="https://github.com/user-attachments/assets/0cc2c934-1faf-4495-a521-6873d5b7c00a" />
 >
 > </details>
