@@ -58,6 +58,14 @@ class GradientNode(CozyBaseNode):
     - 角度渐变 (Angular)
     - 菱形渐变 (Diamond)
     - 椭圆渐变 (Elliptical)
+    
+    输出说明：
+    - image: 渐变与输入图像混合后的结果
+    - mask: 基于渐变透明度的遮罩，可用于后处理
+    
+    反转选项：
+    - invert_alpha: 反转透明度渐变（交换起始和结束透明度）
+    - invert_colors: 反转渐变颜色（交换起始和结束颜色）
     """
     
     NAME = "Gradient"
@@ -151,6 +159,18 @@ class GradientNode(CozyBaseNode):
                 
                 # 输入图像，用于获取尺寸
                 "image": ("IMAGE", {}),
+                
+                # 反转选项
+                "invert_alpha": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "true",
+                    "label_off": "false"
+                }),
+                "invert_colors": ("BOOLEAN", {
+                    "default": False,
+                    "label_on": "true",
+                    "label_off": "false"
+                }),
             },
             "optional": {
             }
@@ -160,6 +180,15 @@ class GradientNode(CozyBaseNode):
     RETURN_NAMES = ("image", "mask")
     FUNCTION = "generate_gradient"
     CATEGORY = f"🌈WBLESS"
+    
+    OUTPUT_NODE = False
+    
+    # 输出说明:
+    # - image: 渐变与输入图像混合后的结果
+    # - mask: 基于渐变透明度的遮罩
+    # 反转选项:
+    # - invert_alpha: 反转透明度渐变（交换起始和结束透明度）
+    # - invert_colors: 反转渐变颜色（交换起始和结束颜色）
 
     @classmethod
     def IS_CHANGED(cls, *args, **kwargs):
@@ -397,8 +426,9 @@ class GradientNode(CozyBaseNode):
     def generate_gradient(self, gradient_type: str, rotation_angle: float, 
                          start_position: float, end_position: float, center_position: float,
                          start_color: str, start_color_hex: str, end_color: str, end_color_hex: str,
-                         start_alpha: float, end_alpha: float, image) -> Tuple[torch.Tensor]:
-        """生成渐变图像"""
+                         start_alpha: float, end_alpha: float, image, 
+                         invert_alpha: bool, invert_colors: bool) -> Tuple[torch.Tensor, torch.Tensor]:
+        """生成渐变图像，支持透明度和颜色反转"""
         
         # 从输入图像获取尺寸
         if isinstance(image, list):
@@ -418,10 +448,6 @@ class GradientNode(CozyBaseNode):
         else:
             raise ValueError(f"Unsupported image tensor shape: {img_tensor.shape}")
         
-        # 解析颜色
-        start_rgb = self.get_color_values(start_color, start_color_hex)
-        end_rgb = self.get_color_values(end_color, end_color_hex)
-        
         # 处理可能是列表格式的参数
         if isinstance(start_alpha, list):
             start_alpha = start_alpha[0] if start_alpha else 1.0
@@ -437,6 +463,22 @@ class GradientNode(CozyBaseNode):
             end_position = end_position[0] if end_position else 1.0
         if isinstance(center_position, list):
             center_position = center_position[0] if center_position else 0.5
+        if isinstance(invert_alpha, list):
+            invert_alpha = invert_alpha[0] if invert_alpha else False
+        if isinstance(invert_colors, list):
+            invert_colors = invert_colors[0] if invert_colors else False
+        
+        # 解析颜色
+        start_rgb = self.get_color_values(start_color, start_color_hex)
+        end_rgb = self.get_color_values(end_color, end_color_hex)
+        
+        # 应用颜色反转 - 交换起始和结束颜色
+        if invert_colors:
+            start_rgb, end_rgb = end_rgb, start_rgb
+        
+        # 应用透明度反转 - 交换起始和结束透明度
+        if invert_alpha:
+            start_alpha, end_alpha = end_alpha, start_alpha
         
         # 将输入图像转换为numpy数组
         # 确保张量在CPU上并且形状正确
@@ -461,9 +503,8 @@ class GradientNode(CozyBaseNode):
                     start_position, end_position, center_position
                 )
                 
-                # 计算颜色 - 双色渐变 (使用RGBA插值)
+                # 计算颜色 - 使用完整的RGBA渐变
                 color = self.interpolate_color(start_rgb, start_alpha, end_rgb, end_alpha, t)
-                
                 gradient_array[y, x] = color
         
         # 将输入图像转换为RGBA格式（如果需要）
