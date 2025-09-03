@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.3.1 Add an ApplyMaskToAlpha node and add new settings to the Gradient node.
 - V2.3.0 Add Gradient Node.
 - V2.2.4 Fix the adaptation of the switch series nodes in the new version of ComfyUI.
 - V2.2.3 Fix switch node runtime errors in certain environments.
@@ -128,6 +129,15 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - The `color` series settings are used to set gradient colors.
 > - The `alpha` series settings are used to set gradient transparency.
 > - The `mask` output port will output the corresponding `mask` based on the transparent gradient.
-><img width="1431" height="927" alt="workflow" src="https://github.com/user-attachments/assets/0cc2c934-1faf-4495-a521-6873d5b7c00a" />
+><img width="1430" height="1078" alt="workflow" src="https://github.com/user-attachments/assets/4064cab1-44f3-45e1-aea3-11fcddeab489" />
+>
+> </details>
+### ApplyMaskToAlpha
+> Set the image transparency based on the mask.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Connect the mask information to the mask input, and it will output an image with an alpha channel.
+><img width="2017" height="1050" alt="workflow" src="https://github.com/user-attachments/assets/3826eab6-4e5c-43da-bd99-0536dbf82efc" />
 >
 > </details>
