@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-WBLESS"
 description = "ComfyUI custom node package. This custom node features multiple practical functions, including global variables, flow control, obtaining image or mask dimensions, and Dominant Axis Scale."
-version = "2.3.1"
+version = "2.4.0"
 license = "LICENSE"
 
 [project.urls]
@@ -13,6 +13,7 @@ PublisherId = "laomaoboss"
 DisplayName = "ComfyUI-WBLESS"
 Icon = ""
 includes = []
+
 
 
 
