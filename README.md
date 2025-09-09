@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.4.0 Add ImageHasAlpha and Area Based Scale (Pixel) nodes,Rename the Area Based Scale node to Area Based Scale (Size).
 - V2.3.1 Add an ApplyMaskToAlpha node and add new settings to the Gradient node.
 - V2.3.0 Add Gradient Node.
 - V2.2.4 Fix the adaptation of the switch series nodes in the new version of ComfyUI.
@@ -79,8 +80,8 @@ ComfyUI custom node package. This custom node features multiple practical functi
 ><img width="3303" height="1224" alt="workflow (1)" src="https://github.com/user-attachments/assets/8c286089-8346-47e1-94a4-f757997d0e9a" />
 >
 > </details>
-### Area Based Scale
-> Smart scale the area of input group A with reference to the area of input group B.
+### Area Based Scale (Size)
+> Smart scale the area of input group A with reference to input group B, based on size.
 > <details>
 > <summary>See More Information</summary>
 >
@@ -90,7 +91,17 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - The output Width, Height, and scale_ratio govern different output formats.
 > - cap_threshold — the upper scaling limit threshold, beyond which the object will not scale any.
 > - enable_cap — threshold activation switch.
-><img width="3467" height="1237" alt="Area_Based_Scale_demo" src="https://github.com/user-attachments/assets/8b257d09-aea3-4f03-bd5c-d148cd8832c3" />
+><img width="3467" height="1237" alt="workflow (4)" src="https://github.com/user-attachments/assets/65e88b78-a1cf-41e8-95b2-78ff04f21e79" />
+>
+> </details>
+### Area Based Scale (Pixel)
+> Smart scale the area of input group A with reference to input group B, based on Pixel.
+> <details>
+> <summary>See More Information</summary>
+>
+> - The image_alpha port connects to an image with a transparency channel. You may need to use it in conjunction with ApplyMaskToAlpha. Unless you explicitly clear the transparency information of the image, please use it alongside ApplyMaskToAlpha to generate an image with transparency channel information. For specific usage, refer to the ApplyMaskToAlpha section.
+> - The image input port is used to connect the background image, or it can be referred to as the reference for scaling.
+><img width="2327" height="1280" alt="Area Based Scale (Pixel)" src="https://github.com/user-attachments/assets/b270bb50-5865-47a9-9738-7aebebcff390" />
 >
 > </details>
 ### Get Image Size
@@ -139,5 +150,13 @@ ComfyUI custom node package. This custom node features multiple practical functi
 >
 > - Connect the mask information to the mask input, and it will output an image with an alpha channel.
 ><img width="2017" height="1050" alt="workflow" src="https://github.com/user-attachments/assets/3826eab6-4e5c-43da-bd99-0536dbf82efc" />
+>
+> </details>
+### ImageHasAlpha
+> Determine whether the image contains transparency channel information.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="842" height="965" alt="ImageHasAlpha" src="https://github.com/user-attachments/assets/56dfe66c-00fa-475e-8fb1-a03ea7323c34" />
 >
 > </details>
