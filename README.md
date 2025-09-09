@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.4.1 Restore the name `Area Based Scale (Size)` to `Area Based Scale`.
 - V2.4.0 Add ImageHasAlpha and Area Based Scale (Pixel) nodes,Rename the Area Based Scale node to Area Based Scale (Size).
 - V2.3.1 Add an ApplyMaskToAlpha node and add new settings to the Gradient node.
 - V2.3.0 Add Gradient Node.
@@ -80,7 +81,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
 ><img width="3303" height="1224" alt="workflow (1)" src="https://github.com/user-attachments/assets/8c286089-8346-47e1-94a4-f757997d0e9a" />
 >
 > </details>
-### Area Based Scale (Size)
+### Area Based Scale
 > Smart scale the area of input group A with reference to input group B, based on size.
 > <details>
 > <summary>See More Information</summary>
