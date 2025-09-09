@@ -8,7 +8,7 @@ class AreaBasedScale(CozyBaseNode):
     - 最终输出的宽高比由输入A决定。
     - 最终输出的面积由输入B的面积和指定的比例（Ratio）共同决定。
     """
-    NAME = "Area Based Scale (Size)"
+    NAME = "Area Based Scale"
     
     @classmethod
     def INPUT_TYPES(s):
