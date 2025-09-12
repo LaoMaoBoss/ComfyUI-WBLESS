@@ -123,15 +123,16 @@ class AreaBasedScale(CozyBaseNode):
 class AreaBasedScalePixel(CozyBaseNode):
     """
     一个根据"像素数量比例"计算缩放比例的节点。
-    - 计算image_alpha中不透明像素数量（透明通道值 > 0的像素）
-    - 计算image的总像素数量
-    - 以image像素量为基准，根据ratio计算所需的缩放比例
+    - 缩放image_alpha整个图像，使其实际图像（不透明像素）的像素量 = image总像素量 × ratio
+    - scale_ratio表示image_alpha需要缩放的倍数（相对于原始image_alpha尺寸）
     
-    例如：image=1000像素，image_alpha=500不透明像素，ratio=0.5
-    需要的目标像素 = image * ratio = 1000 * 0.5 = 500
-    当前不透明像素 = 500，所以scale_ratio = 1.0（不需要缩放）
-    
-    如果ratio=1.0，目标像素 = 1000，scale_ratio = 1000/500 = 2.0
+    计算逻辑：
+    1. 计算image_alpha中不透明像素数量
+    2. 计算目标不透明像素数量 = image总像素 × ratio
+    3. 计算面积缩放比例 = 目标像素数量 / 当前不透明像素数量
+    4. 计算线性缩放比例 = sqrt(面积缩放比例)
+    5. scale_ratio = 线性缩放比例（即image_alpha需要缩放的倍数）
+    6. 同时输出缩放后的image_alpha尺寸
     """
     NAME = "Area Based Scale (Pixel)"
     
@@ -141,7 +142,7 @@ class AreaBasedScalePixel(CozyBaseNode):
         定义节点的输入类型。
         - image_alpha: 带透明通道的图片，用于计算不透明像素数量
         - image: 用于计算总像素数量作为基准
-        - 一个比例滑块 (ratio) 用于控制目标像素数量与image像素数量的比例
+        - ratio: 目标像素数量与image像素数量的比例
         """
         return {
             "required": {
@@ -151,13 +152,20 @@ class AreaBasedScalePixel(CozyBaseNode):
             },
         }
 
-    RETURN_TYPES = ("FLOAT",)
-    RETURN_NAMES = ("scale_ratio",)
+    RETURN_TYPES = ("FLOAT", "INT", "INT")
+    RETURN_NAMES = ("scale_ratio", "scaled_width", "scaled_height")
     FUNCTION = "scale"
     
     def scale(self, image_alpha, image, ratio: float):
         """
-        根据"像素数量比例"逻辑计算缩放比例。
+        根据新的"像素数量比例"逻辑计算缩放比例。
+        
+        新逻辑：
+        1. 计算image_alpha中不透明像素数量
+        2. 计算目标不透明像素数量 = image总像素 × ratio
+        3. 计算面积缩放比例，使image_alpha缩放后的不透明像素数量达到目标
+        4. 根据面积缩放比例计算image_alpha的新尺寸
+        5. scale_ratio = 缩放后的image_alpha尺寸 / 原始image_alpha尺寸（线性缩放比例）
         """
         # 处理可能的列表类型参数
         if isinstance(ratio, list) and ratio:
@@ -177,22 +185,24 @@ class AreaBasedScalePixel(CozyBaseNode):
         elif len(image.shape) == 3:  # [height, width, channels]
             image_height, image_width, channels = image.shape
         else:
-            return (1.0,)
+            return (1.0, 0, 0)
             
         # 计算image的总像素数量
         image_total_pixels = image_width * image_height
         
-        # 获取带透明通道图像的数据
+        # 获取image_alpha的尺寸
         if len(image_alpha.shape) == 4:  # [batch, height, width, channels]
             alpha_data = image_alpha[0]  # 取第一个batch
+            alpha_height, alpha_width = alpha_data.shape[0], alpha_data.shape[1]
         elif len(image_alpha.shape) == 3:  # [height, width, channels]
             alpha_data = image_alpha
+            alpha_height, alpha_width = alpha_data.shape[0], alpha_data.shape[1]
         else:
-            return (1.0,)
+            return (1.0, 0, 0)
 
-        # 如果image的尺寸无效，返回默认缩放比例
+        # 如果image的尺寸无效，返回默认值
         if image_total_pixels <= 0:
-            return (1.0,)
+            return (1.0, alpha_width, alpha_height)
         
         # 将image_alpha转换为torch tensor以便计算
         if not isinstance(alpha_data, torch.Tensor):
@@ -200,7 +210,7 @@ class AreaBasedScalePixel(CozyBaseNode):
         else:
             alpha_tensor = alpha_data
             
-        # 提取透明通道（假设是最后一个通道）并计算不透明像素数量
+        # 提取透明通道并计算不透明像素数量
         if alpha_tensor.shape[-1] >= 4:  # 有透明通道
             alpha_channel = alpha_tensor[:, :, 3]  # 透明通道
             opaque_pixels = torch.sum(alpha_channel > 0).item()
@@ -208,16 +218,32 @@ class AreaBasedScalePixel(CozyBaseNode):
             # 如果没有透明通道，则所有像素都视为不透明
             opaque_pixels = alpha_tensor.shape[0] * alpha_tensor.shape[1]
         
-        # 计算目标像素数量：image总像素 * ratio
-        target_pixels = image_total_pixels * ratio
+        # 计算目标不透明像素数量：image总像素 × ratio
+        target_opaque_pixels = image_total_pixels * ratio
         
         # 如果当前不透明像素数量为0，避免除零错误
         if opaque_pixels <= 0:
-            return (1.0,)
+            return (1.0, alpha_width, alpha_height)
         
-        # 计算所需的缩放比例
-        # 像素总量缩放关系：当前不透明像素 × scale_ratio = 目标像素
-        # scale_ratio = target_pixels / opaque_pixels
-        scale_ratio = target_pixels / opaque_pixels
+        # 计算需要的面积缩放比例：要使不透明像素数量从当前值变为目标值
+        # 面积缩放比例 = 目标像素数量 / 当前不透明像素数量
+        area_scale_ratio = target_opaque_pixels / opaque_pixels
         
-        return (scale_ratio,)
+        # 计算线性缩放比例（面积缩放比例的平方根）
+        # 因为面积 = 宽 × 高，所以线性缩放 = sqrt(面积缩放)
+        linear_scale_ratio = math.sqrt(area_scale_ratio)
+        
+        # 计算image_alpha缩放后的新整体尺寸（注意：这是整个图像的尺寸，不仅仅是不透明部分）
+        scaled_alpha_width = alpha_width * linear_scale_ratio
+        scaled_alpha_height = alpha_height * linear_scale_ratio
+        
+        # scale_ratio就是线性缩放比例本身
+        # 这表示image_alpha需要缩放多少倍才能达到目标不透明像素数量
+        final_scale_ratio = linear_scale_ratio
+        
+        # 返回最终缩放比例和缩放后的尺寸（四舍五入为整数）
+        return (
+            final_scale_ratio,
+            int(round(scaled_alpha_width)),
+            int(round(scaled_alpha_height))
+        )
