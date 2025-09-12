@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.4.2 Fix the calculation error issue of the Area Based Scale (Pixel) node.
 - V2.4.1 Restore the name `Area Based Scale (Size)` to `Area Based Scale`.
 - V2.4.0 Add ImageHasAlpha and Area Based Scale (Pixel) nodes,Rename the Area Based Scale node to Area Based Scale (Size).
 - V2.3.1 Add an ApplyMaskToAlpha node and add new settings to the Gradient node.
