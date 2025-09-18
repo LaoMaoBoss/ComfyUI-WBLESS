@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.5.0 Added Baseline Alignment (X) and Baseline Alignment (Y) nodes.
 - V2.4.2 Fix the calculation error issue of the Area Based Scale (Pixel) node.
 - V2.4.1 Restore the name `Area Based Scale (Size)` to `Area Based Scale`.
 - V2.4.0 Add ImageHasAlpha and Area Based Scale (Pixel) nodes,Rename the Area Based Scale node to Area Based Scale (Size).
@@ -160,5 +161,13 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > <summary>See More Information</summary>
 >
 ><img width="842" height="965" alt="ImageHasAlpha" src="https://github.com/user-attachments/assets/56dfe66c-00fa-475e-8fb1-a03ea7323c34" />
+>
+> </details>
+### Baseline Alignment (X) & Baseline Alignment (Y)
+> Input two different heights, then set a baseline. The output will be how much the center position of height a needs to be adjusted so that its bottom position aligns with the baseline position of height b.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="1947" height="994" alt="Baseline_Alignment_demo" src="https://github.com/user-attachments/assets/000ecd6a-43ab-4473-bcfb-148985e34107" />
 >
 > </details>
