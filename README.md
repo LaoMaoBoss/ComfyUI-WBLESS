@@ -171,3 +171,13 @@ ComfyUI custom node package. This custom node features multiple practical functi
 ><img width="1947" height="994" alt="Baseline_Alignment_demo" src="https://github.com/user-attachments/assets/000ecd6a-43ab-4473-bcfb-148985e34107" />
 >
 > </details>
+### Jimeng Image 4.0
+> Jimeng Image 4.0 node.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Please go to [火山引擎](https://www.volcengine.com) to complete the key application.
+> - Since Jimeng 4.0 does not currently support base64, please go to [PicGo](https://www.picgo.net) to obtain the image hosting key.
+><img width="1701" height="960" alt="workflow (5)" src="https://github.com/user-attachments/assets/ed4b45e1-770e-48f4-a4f9-8b1275ffe83c" />
+>
+> </details>
