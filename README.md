@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.6.0 Add the Jimeng Image 4.0 node and enhance the functionality of the Text Block node.
 - V2.5.0 Added Baseline Alignment (X) and Baseline Alignment (Y) nodes.
 - V2.4.2 Fix the calculation error issue of the Area Based Scale (Pixel) node.
 - V2.4.1 Restore the name `Area Based Scale (Size)` to `Area Based Scale`.
