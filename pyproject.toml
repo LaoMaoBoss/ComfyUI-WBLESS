@@ -1,7 +1,7 @@
 [project]
 name = "ComfyUI-WBLESS"
-description = "Nodes: Set Global Variable, Get Global Variable, Inversed Switch, Switch, Dominant Axis Scale, Area Based Scale, Area Based Scale (Pixel), Get Image Size, Get Mask Size, Overlay Text, Text Block, Gradient, ApplyMaskToAlpha, ImageHasAlpha, Baseline Alignment (X), Baseline Alignment (Y)."
-version = "2.5.0"
+description = "Nodes: Jimeng Image 4.0, Set Global Variable, Get Global Variable, Inversed Switch, Switch, Dominant Axis Scale, Area Based Scale, Area Based Scale (Pixel), Get Image Size, Get Mask Size, Overlay Text, Text Block, Gradient, ApplyMaskToAlpha, ImageHasAlpha, Baseline Alignment (X), Baseline Alignment (Y)."
+version = "2.6.0"
 license = "LICENSE"
 
 [project.urls]
@@ -13,6 +13,7 @@ PublisherId = "laomaoboss"
 DisplayName = "ComfyUI-WBLESS"
 Icon = ""
 includes = []
+
 
 
 
