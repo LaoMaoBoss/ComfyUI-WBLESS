@@ -1248,6 +1248,70 @@ def justify_text(justify, img_width, line_width, margins):
     return text_plot_x
 
 
+def wrap_text_to_width(text, font, max_width, letter_spacing=0):
+    """
+    将文本按指定宽度自动换行（在最大宽度处直接换行，不考虑单词边界）
+    
+    Args:
+        text (str): 要换行的文本
+        font: PIL字体对象
+        max_width (int): 最大宽度（像素）
+        letter_spacing (int): 字间距
+    
+    Returns:
+        str: 换行后的文本（用\n分隔）
+    """
+    if not text or max_width <= 0:
+        return text
+    
+    # 创建一个临时绘图上下文来测量文本
+    temp_img = Image.new('RGB', (1, 1))
+    temp_draw = ImageDraw.Draw(temp_img)
+    
+    # 将文本按现有的换行符分割
+    paragraphs = text.split('\n')
+    wrapped_paragraphs = []
+    
+    for paragraph in paragraphs:
+        if not paragraph.strip():
+            wrapped_paragraphs.append("")
+            continue
+            
+        wrapped_lines = []
+        current_line = ""
+        
+        # 逐字符处理，不考虑单词边界
+        for char in paragraph:
+            # 计算添加这个字符后的行宽
+            test_line = current_line + char
+            
+            # 计算测试行的实际宽度（考虑字间距）
+            if letter_spacing == 0:
+                line_width, _ = get_text_size(temp_draw, test_line, font)
+            else:
+                line_width = 0
+                for i, c in enumerate(test_line):
+                    char_width, _ = get_text_size(temp_draw, c, font)
+                    line_width += char_width
+                    if i < len(test_line) - 1:  # 最后一个字符后不加间距
+                        line_width += letter_spacing
+            
+            # 如果测试行宽度超过限制且当前行不为空，开始新行
+            if line_width > max_width and current_line:
+                wrapped_lines.append(current_line)
+                current_line = char
+            else:
+                current_line = test_line
+        
+        # 添加最后一行
+        if current_line:
+            wrapped_lines.append(current_line)
+        
+        wrapped_paragraphs.extend(wrapped_lines)
+    
+    return '\n'.join(wrapped_paragraphs)
+
+
 
 def draw_masked_text(text_mask, text, font_name, font_size, letter_spacing, line_spacing,
                      position_x, position_y, align, justify, rotation_angle, rotation_options, 
@@ -1754,8 +1818,10 @@ class TextBlock(CozyBaseNode):
                 "font_color": (COLORS,),
                 "font_color_hex": ("STRING", {"multiline": False, "default": "#FFFFFF"}),  # 移动到font_color下面
                 "letter_spacing": ("INT", {"default": 0, "min": -50, "max": 100}),
-                "auto_newline": ("BOOLEAN", {"default": False}),
-                "expand_advanced": ("BOOLEAN", {"default": False}),  # 展开高级选项开关（放在auto_newline后面）
+                "newline": ("BOOLEAN", {"default": False}),  # 换行控制（原auto_newline功能）
+                "auto_newline": ("BOOLEAN", {"default": False}),  # 启用自动换行
+                "auto_newline_width": ("INT", {"default": 300, "min": 50, "max": 2048}),  # 自动换行的宽度限制
+                "expand_advanced": ("BOOLEAN", {"default": False}),  # 展开高级选项开关
             },
             "optional": {
                 "horizontal_spacing": ("INT", {"default": 0, "min": -200, "max": 200}),  # 与后一文本的水平间距
@@ -1828,7 +1894,9 @@ class TextBlock(CozyBaseNode):
             "font_color_hex": safe_get("font_color_hex", "#FFFFFF"),
             "letter_spacing": safe_get("letter_spacing", 0),  # 添加字间距参数
             "expand_advanced": safe_get("expand_advanced", False),  # 添加展开高级选项参数
-            "auto_newline": safe_get("auto_newline", False),  # 添加自动换行参数
+            "newline": safe_get("newline", False),  # 换行参数（原auto_newline功能）
+            "auto_newline": safe_get("auto_newline", False),  # 启用自动换行
+            "auto_newline_width": safe_get("auto_newline_width", 300),  # 自动换行的宽度限制
             "horizontal_spacing": safe_get("horizontal_spacing", 0),  # 添加水平间距参数
             "vertical_spacing": safe_get("vertical_spacing", 0),      # 添加垂直间距参数
             "rotation_angle": safe_get("rotation_angle", 0.0),       # 添加旋转角度参数
@@ -2028,6 +2096,15 @@ class OverlayText(CozyBaseNode):
                 
                 # 计算文本尺寸
                 text = block.get("text", "")
+                
+                # 检查是否启用自动换行
+                auto_newline = block.get("auto_newline", False)
+                auto_newline_width = block.get("auto_newline_width", 300)
+                
+                # 如果启用自动换行，对文本进行换行处理
+                if auto_newline and auto_newline_width > 0:
+                    text = wrap_text_to_width(text, font, auto_newline_width, letter_spacing_value)
+                
                 text_lines = text.split('\n')
                 max_line_height = 0
                 max_line_width = 0
@@ -2098,10 +2175,10 @@ class OverlayText(CozyBaseNode):
                 if not block or not isinstance(block, dict):
                     continue
                     
-                auto_newline = block.get("auto_newline", False)
+                newline = block.get("newline", False)
                 
                 # 如果当前文本块设置了换行且不是第一个文本块，开始新行
-                if auto_newline and i > 0 and current_line:
+                if newline and i > 0 and current_line:
                     text_lines.append(current_line)
                     current_line = []
                 
@@ -2239,10 +2316,37 @@ class OverlayText(CozyBaseNode):
                     block_rotation_options = block.get("rotation_options", "text center")
                     block_italic_enabled = block.get("italic", False)
                     
+                    # 获取文本内容并应用自动换行（在旋转渲染阶段）
+                    text_content = block.get("text", "")
+                    auto_newline = block.get("auto_newline", False)
+                    auto_newline_width = block.get("auto_newline_width", 300)
+                    
+                    # 如果启用自动换行，处理文本
+                    if auto_newline and auto_newline_width > 0:
+                        # 需要获取字体来进行换行计算
+                        font_name = block.get("font_name", None)
+                        font_size = block.get("font_size", 50)
+                        
+                        # 验证字体路径
+                        if font_name and os.path.isabs(font_name) and os.path.exists(font_name) and os.access(font_name, os.R_OK):
+                            font_path = font_name
+                        else:
+                            font_path = None
+                        
+                        try:
+                            if font_path:
+                                font = ImageFont.truetype(font_path, size=font_size)
+                            else:
+                                font = ImageFont.load_default()
+                        except (IOError, OSError):
+                            font = ImageFont.load_default()
+                        
+                        text_content = wrap_text_to_width(text_content, font, auto_newline_width, block_letter_spacing)
+                    
                     # 使用draw_masked_text函数绘制文本
                     rotated_text_mask = draw_masked_text(
                         text_mask, 
-                        block.get("text", ""),
+                        text_content,
                         block.get("font_name", "arial.ttf"),
                         block.get("font_size", 50),
                         block_letter_spacing,  # 使用Text Block的字间距参数
@@ -2426,10 +2530,37 @@ class OverlayText(CozyBaseNode):
                     block_rotation_options = block.get("rotation_options", "text center")
                     block_italic_enabled = block.get("italic", False)
                     
+                    # 获取文本内容并应用自动换行（在直接渲染阶段）
+                    text_content = block.get("text", "")
+                    auto_newline = block.get("auto_newline", False)
+                    auto_newline_width = block.get("auto_newline_width", 300)
+                    
+                    # 如果启用自动换行，处理文本
+                    if auto_newline and auto_newline_width > 0:
+                        # 需要获取字体来进行换行计算
+                        font_name = block.get("font_name", None)
+                        font_size = block.get("font_size", 50)
+                        
+                        # 验证字体路径
+                        if font_name and os.path.isabs(font_name) and os.path.exists(font_name) and os.access(font_name, os.R_OK):
+                            font_path = font_name
+                        else:
+                            font_path = None
+                        
+                        try:
+                            if font_path:
+                                font = ImageFont.truetype(font_path, size=font_size)
+                            else:
+                                font = ImageFont.load_default()
+                        except (IOError, OSError):
+                            font = ImageFont.load_default()
+                        
+                        text_content = wrap_text_to_width(text_content, font, auto_newline_width, block_letter_spacing)
+                    
                     # 使用draw_masked_text函数绘制文本
                     rotated_text_mask = draw_masked_text(
                         text_mask, 
-                        block.get("text", ""),
+                        text_content,
                         block.get("font_name", "arial.ttf"),
                         block.get("font_size", 50),
                         block_letter_spacing,  # 使用Text Block的字间距参数

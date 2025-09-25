@@ -69,7 +69,7 @@ function measureAllTextBlocks(ctx, textBlocks, overlaySettings = {}) {
     let currentY = 20; // 初始Y位置
     let currentX = 20; // 初始X位置
     
-    // 先分组文本块（按auto_newline分组）
+    // 先分组文本块（按newline分组）
     const textGroups = [];
     let currentGroup = [];
     
@@ -77,8 +77,8 @@ function measureAllTextBlocks(ctx, textBlocks, overlaySettings = {}) {
         const block = textBlocks[i];
         if (!block || !block.text) continue;
         
-        // 如果当前块设置了auto_newline且不是第一个块，开始新组
-        if (block.auto_newline && currentGroup.length > 0) {
+        // 如果当前块设置了newline且不是第一个块，开始新组
+        if (block.newline && currentGroup.length > 0) {
             textGroups.push(currentGroup);
             currentGroup = [];
         }
@@ -106,18 +106,44 @@ function measureAllTextBlocks(ctx, textBlocks, overlaySettings = {}) {
         for (const {block} of group) {
             const originalFontSize = block.font_size || 50;
             const fontFamily = block.font_family || 'Arial';
-            const processedText = processTextCase(block.text || '', block.text_case);
+            let processedText = processTextCase(block.text || '', block.text_case);
+            
+            // 检查是否启用自动换行
+            if (block.auto_newline && block.auto_newline_width && block.auto_newline_width > 0) {
+                const originalText = processedText;
+                processedText = wrapTextForPreview(ctx, processedText, fontFamily, originalFontSize, block.auto_newline_width, block.letter_spacing || 0);
+                
+                // 添加调试信息
+                if (originalText !== processedText) {
+                    console.log('[WBLESS] Auto-wrap applied in preview (group width calc):');
+                    console.log('  Original:', originalText);
+                    console.log('  Wrapped:', processedText);
+                    console.log('  Width limit:', block.auto_newline_width);
+                    console.log('  Lines count:', processedText.split('\n').length);
+                }
+            }
             
             // 临时设置字体来测量
             const savedFont = ctx.font;
             ctx.font = `${originalFontSize}px ${fontFamily}`;
-            const textMetrics = ctx.measureText(processedText);
-            ctx.font = savedFont;
             
-            let textWidth = textMetrics.width;
-            if (block.letter_spacing && block.letter_spacing !== 0 && processedText.length > 1) {
-                textWidth += (processedText.length - 1) * block.letter_spacing;
+            // 处理多行文本的宽度测量
+            const lines = processedText.split('\n');
+            let maxLineWidth = 0;
+            
+            for (const line of lines) {
+                const textMetrics = ctx.measureText(line);
+                let lineWidth = textMetrics.width;
+                
+                if (block.letter_spacing && block.letter_spacing !== 0 && line.length > 1) {
+                    lineWidth += (line.length - 1) * block.letter_spacing;
+                }
+                
+                maxLineWidth = Math.max(maxLineWidth, lineWidth);
             }
+            
+            ctx.font = savedFont;
+            let textWidth = maxLineWidth;
             
             totalGroupWidth += textWidth + (block.horizontal_spacing || 0);
             groupMaxFontSize = Math.max(groupMaxFontSize, originalFontSize); // 记录最大字体大小
@@ -132,18 +158,51 @@ function measureAllTextBlocks(ctx, textBlocks, overlaySettings = {}) {
             const fontFamily = block.font_family || 'Arial';
             
             // 应用文本样式进行测量
-            const processedText = processTextCase(block.text || '', block.text_case);
-            ctx.font = `${originalFontSize}px ${fontFamily}`;
-            const textMetrics = ctx.measureText(processedText);
+            let processedText = processTextCase(block.text || '', block.text_case);
             
-            // 计算字间距对宽度的影响
-            let textWidth = textMetrics.width;
-            if (block.letter_spacing && block.letter_spacing !== 0 && processedText.length > 1) {
-                textWidth += (processedText.length - 1) * block.letter_spacing;
+            // 检查是否启用自动换行
+            if (block.auto_newline && block.auto_newline_width && block.auto_newline_width > 0) {
+                const originalText = processedText;
+                processedText = wrapTextForPreview(ctx, processedText, fontFamily, originalFontSize, block.auto_newline_width, block.letter_spacing || 0);
+                
+                // 添加调试信息
+                if (originalText !== processedText) {
+                    console.log('[WBLESS] Auto-wrap applied in preview (measurement):');
+                    console.log('  Original:', originalText);
+                    console.log('  Wrapped:', processedText);
+                    console.log('  Width limit:', block.auto_newline_width);
+                    console.log('  Lines count:', processedText.split('\n').length);
+                }
             }
             
-            const blockWidth = textWidth + (block.horizontal_spacing || 0);
-            const blockHeight = originalFontSize + (block.vertical_spacing || 0);
+            ctx.font = `${originalFontSize}px ${fontFamily}`;
+            
+            // 处理多行文本的尺寸测量
+            const lines = processedText.split('\n');
+            let maxLineWidth = 0;
+            let totalHeight = 0;
+            
+            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                const line = lines[lineIndex];
+                const textMetrics = ctx.measureText(line);
+                let lineWidth = textMetrics.width;
+                
+                // 计算字间距对宽度的影响
+                if (block.letter_spacing && block.letter_spacing !== 0 && line.length > 1) {
+                    lineWidth += (line.length - 1) * block.letter_spacing;
+                }
+                
+                maxLineWidth = Math.max(maxLineWidth, lineWidth);
+            }
+            
+            // 计算总高度（考虑行间距）
+            const baseLineHeight = originalFontSize * 1.2; // 基础行高
+            const lineSpacingForMeasurement = overlaySettings.line_spacing || 0; // 获取行间距
+            const actualLineHeight = baseLineHeight + lineSpacingForMeasurement;
+            totalHeight = lines.length > 0 ? ((lines.length - 1) * actualLineHeight + baseLineHeight) : 0;
+            
+            const blockWidth = maxLineWidth + (block.horizontal_spacing || 0);
+            const blockHeight = totalHeight + (block.vertical_spacing || 0);
             
             // 记录这个文本块的位置和尺寸
             const measurement = {
@@ -241,6 +300,88 @@ function processTextCase(text, textCase) {
 }
 
 /**
+ * 为预览系统实现文本自动换行（在最大宽度处直接换行，不考虑单词边界）
+ * @param {CanvasRenderingContext2D} ctx - 画布上下文
+ * @param {string} text - 要换行的文本
+ * @param {string} fontFamily - 字体家族
+ * @param {number} fontSize - 字体大小
+ * @param {number} maxWidth - 最大宽度（像素）
+ * @param {number} letterSpacing - 字间距
+ * @returns {string} 换行后的文本（用\n分隔）
+ */
+function wrapTextForPreview(ctx, text, fontFamily, fontSize, maxWidth, letterSpacing = 0) {
+    if (!text || maxWidth <= 0) {
+        return text;
+    }
+    
+    // 调试信息
+    if (letterSpacing && letterSpacing !== 0) {
+        console.log('[WBLESS] wrapTextForPreview with letter spacing:');
+        console.log('  Letter spacing:', letterSpacing);
+        console.log('  Max width:', maxWidth);
+        console.log('  Font size:', fontSize);
+    }
+    
+    // 设置字体用于测量
+    const savedFont = ctx.font;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    
+    // 将文本按现有的换行符分割
+    const paragraphs = text.split('\n');
+    const wrappedParagraphs = [];
+    
+    for (const paragraph of paragraphs) {
+        if (!paragraph.trim()) {
+            wrappedParagraphs.push("");
+            continue;
+        }
+        
+        const wrappedLines = [];
+        let currentLine = "";
+        
+        // 逐字符处理，不考虑单词边界
+        for (const char of paragraph) {
+            // 计算添加这个字符后的行宽
+            const testLine = currentLine + char;
+            
+            // 计算测试行的实际宽度（考虑字间距）
+            let lineWidth;
+            if (letterSpacing === 0) {
+                lineWidth = ctx.measureText(testLine).width;
+            } else {
+                lineWidth = 0;
+                for (let i = 0; i < testLine.length; i++) {
+                    lineWidth += ctx.measureText(testLine[i]).width;
+                    if (i < testLine.length - 1) {  // 最后一个字符后不加间距
+                        lineWidth += letterSpacing;
+                    }
+                }
+            }
+            
+            // 如果测试行宽度超过限制且当前行不为空，开始新行
+            if (lineWidth > maxWidth && currentLine) {
+                wrappedLines.push(currentLine);
+                currentLine = char;
+            } else {
+                currentLine = testLine;
+            }
+        }
+        
+        // 添加最后一行
+        if (currentLine) {
+            wrappedLines.push(currentLine);
+        }
+        
+        wrappedParagraphs.push(...wrappedLines);
+    }
+    
+    // 恢复字体设置
+    ctx.font = savedFont;
+    
+    return wrappedParagraphs.join('\n');
+}
+
+/**
  * 使用全局缩放绘制所有文本块
  * @param {CanvasRenderingContext2D} ctx - 画布上下文
  * @param {Object} textMeasurements - 文本测量结果
@@ -259,8 +400,9 @@ function renderScaledTextBlocks(ctx, textMeasurements, globalScale, canvas, debu
     const baseOffsetX = (canvas.width - scaledWidth) / 2 - bounds.minX * globalScale;
     const baseOffsetY = (canvas.height - scaledHeight) / 2 - bounds.minY * globalScale;
     
-    // 获取justify设置，用于控制每行内部的文字对齐
+    // 获取设置，用于控制每行内部的文字对齐和行间距
     const justify = overlaySettings.justify || "center";
+    const lineSpacing = (overlaySettings.line_spacing || 0) * globalScale; // 应用缩放
     
     // 按组分组文本块，用于行内对齐处理
     const blocksByGroup = {};
@@ -413,10 +555,10 @@ function renderScaledTextBlocks(ctx, textMeasurements, globalScale, canvas, debu
                         const dy = j * stepSize;
                         if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) { // 不在原位置重复绘制
                             if (block.letter_spacing && block.letter_spacing !== 0) {
-                                drawTextWithLetterSpacing(ctx, text, textOffsetX + dx, textOffsetY + dy, block.letter_spacing * globalScale);
-                            } else {
-                                ctx.fillText(text, textOffsetX + dx, textOffsetY + dy);
-                            }
+                            drawTextWithLetterSpacing(ctx, text, textOffsetX + dx, textOffsetY + dy, block.letter_spacing * globalScale, lineSpacing);
+                        } else {
+                            drawMultiLineText(ctx, text, textOffsetX + dx, textOffsetY + dy, scaledFontSize, lineSpacing);
+                        }
                         }
                     }
                 }
@@ -424,9 +566,9 @@ function renderScaledTextBlocks(ctx, textMeasurements, globalScale, canvas, debu
             
             // 绘制主文本
             if (block.letter_spacing && block.letter_spacing !== 0) {
-                drawTextWithLetterSpacing(ctx, text, textOffsetX, textOffsetY, block.letter_spacing * globalScale);
+                drawTextWithLetterSpacing(ctx, text, textOffsetX, textOffsetY, block.letter_spacing * globalScale, lineSpacing);
             } else {
-                ctx.fillText(text, textOffsetX, textOffsetY);
+                drawMultiLineText(ctx, text, textOffsetX, textOffsetY, scaledFontSize, lineSpacing);
             }
             
             ctx.restore();
@@ -454,20 +596,20 @@ function renderScaledTextBlocks(ctx, textMeasurements, globalScale, canvas, debu
                     const dy = j * stepSize;
                     if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) { // 不在原位置重复绘制
                         if (block.letter_spacing && block.letter_spacing !== 0) {
-                            drawTextWithLetterSpacing(ctx, text, scaledX + dx, finalY + dy, block.letter_spacing * globalScale);
+                            drawTextWithLetterSpacing(ctx, text, scaledX + dx, finalY + dy, block.letter_spacing * globalScale, lineSpacing);
                         } else {
-                            ctx.fillText(text, scaledX + dx, finalY + dy);
+                            drawMultiLineText(ctx, text, scaledX + dx, finalY + dy, scaledFontSize, lineSpacing);
                         }
                     }
                 }
             }
         }
         
-        // 绘制主文本
+        // 绘制主文本（处理多行文本）
         if (block.letter_spacing && block.letter_spacing !== 0) {
-            drawTextWithLetterSpacing(ctx, text, scaledX, finalY, block.letter_spacing * globalScale);
+            drawTextWithLetterSpacing(ctx, text, scaledX, finalY, block.letter_spacing * globalScale, lineSpacing);
         } else {
-            ctx.fillText(text, scaledX, finalY);
+            drawMultiLineText(ctx, text, scaledX, finalY, scaledFontSize, lineSpacing);
         }
         }
         
@@ -509,21 +651,94 @@ function renderScaledTextBlocks(ctx, textMeasurements, globalScale, canvas, debu
 }
 
 /**
- * 绘制带字间距的文本
+ * 在画布上绘制多行文本
  * @param {CanvasRenderingContext2D} ctx - 画布上下文
- * @param {string} text - 要绘制的文本
+ * @param {string} text - 要绘制的文本（可包含\n）
+ * @param {number} x - 起始x坐标
+ * @param {number} y - 起始y坐标
+ * @param {number} fontSize - 字体大小（用于计算行高）
+ * @param {number} lineSpacing - 行间距（像素）
+ */
+function drawMultiLineText(ctx, text, x, y, fontSize, lineSpacing = 0) {
+    if (!text) return;
+    
+    const lines = text.split('\n');
+    const baseLineHeight = fontSize * 1.2; // 基础行高为字体大小的1.2倍
+    const lineHeight = baseLineHeight + lineSpacing; // 加上行间距
+    
+    // 调试信息
+    if (lines.length > 1) {
+        console.log('[WBLESS] Drawing multi-line text:');
+        console.log('  Text:', text);
+        console.log('  Lines:', lines);
+        console.log('  Position:', {x, y});
+        console.log('  Font size:', fontSize);
+        console.log('  Line spacing:', lineSpacing);
+        console.log('  Line height:', lineHeight);
+    }
+    
+    for (let i = 0; i < lines.length; i++) {
+        const lineY = y + (i * lineHeight);
+        ctx.fillText(lines[i], x, lineY);
+        
+        if (lines.length > 1) {
+            console.log(`  Line ${i}: "${lines[i]}" at y=${lineY}`);
+        }
+    }
+}
+
+/**
+ * 绘制带字间距的文本（支持多行）
+ * @param {CanvasRenderingContext2D} ctx - 画布上下文
+ * @param {string} text - 要绘制的文本（可包含\n）
  * @param {number} x - 起始X坐标
  * @param {number} y - 起始Y坐标
  * @param {number} letterSpacing - 字间距（像素）
+ * @param {number} lineSpacing - 行间距（像素）
  */
-function drawTextWithLetterSpacing(ctx, text, x, y, letterSpacing) {
-    let currentX = x;
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        ctx.fillText(char, currentX, y);
-        const charWidth = ctx.measureText(char).width;
-        currentX += charWidth + letterSpacing;
+function drawTextWithLetterSpacing(ctx, text, x, y, letterSpacing, lineSpacing = 0) {
+    if (!text) return;
+    
+    const lines = text.split('\n');
+    // 从字体设置中提取字体大小
+    const fontSize = extractFontSizeFromFont(ctx.font);
+    const baseLineHeight = fontSize * 1.2; // 基础行高
+    const lineHeight = baseLineHeight + lineSpacing; // 加上行间距
+    
+    // 调试信息
+    if (letterSpacing && letterSpacing !== 0) {
+        console.log('[WBLESS] Drawing text with letter spacing:');
+        console.log('  Text:', text);
+        console.log('  Font:', ctx.font);
+        console.log('  Extracted font size:', fontSize);
+        console.log('  Letter spacing:', letterSpacing);
+        console.log('  Line spacing:', lineSpacing);
+        console.log('  Line height:', lineHeight);
     }
+    
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+        const line = lines[lineIndex];
+        const lineY = y + (lineIndex * lineHeight);
+        let currentX = x;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            ctx.fillText(char, currentX, lineY);
+            const charWidth = ctx.measureText(char).width;
+            currentX += charWidth + letterSpacing;
+        }
+    }
+}
+
+/**
+ * 从字体字符串中提取字体大小
+ * @param {string} fontString - CSS字体字符串，如 "italic bold 20px Arial"
+ * @returns {number} 字体大小（像素）
+ */
+function extractFontSizeFromFont(fontString) {
+    // 支持更复杂的字体字符串格式
+    const match = fontString.match(/(\d+(?:\.\d+)?)px/);
+    return match ? parseFloat(match[1]) : 16; // 默认16px
 }
 
 /**
