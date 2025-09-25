@@ -432,7 +432,7 @@ function setupParameterChangeTracking(node) {
  * @param {boolean} showAdvanced - 是否显示高级选项
  */
 function manageAdvancedOptions(node, showAdvanced) {
-    // 需要隐藏的高级选项（从horizontal_spacing开始，不包括auto_newline和expand_advanced）
+    // 需要隐藏的高级选项（从horizontal_spacing开始，不包括newline、auto_newline、auto_newline_width和expand_advanced）
     const advancedOptionNames = [
         "horizontal_spacing",
         "vertical_spacing", 

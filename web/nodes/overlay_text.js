@@ -440,7 +440,9 @@ function updatePreview(node) {
                 font_family: block?.font_family,
                 font_weight: block?.font_weight,
                 font_size: block?.font_size,
-                auto_newline: block?.auto_newline,
+                newline: block?.newline,
+                auto_newline: block?.auto_newline,  // 添加自动换行开关
+                auto_newline_width: block?.auto_newline_width,  // 添加自动换行宽度
                 horizontal_spacing: block?.horizontal_spacing,
                 vertical_spacing: block?.vertical_spacing,
                 letter_spacing: block?.letter_spacing,
