@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.7.0 Add Image Mask Blend Node.
 - V2.6.0 Add the Jimeng Image 4.0 node and enhance the functionality of the Text Block node.
 - V2.5.0 Added Baseline Alignment (X) and Baseline Alignment (Y) nodes.
 - V2.4.2 Fix the calculation error issue of the Area Based Scale (Pixel) node.
@@ -180,5 +181,13 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - Please go to [火山引擎](https://www.volcengine.com) to complete the key application.
 > - Since Jimeng 4.0 does not currently support base64, please go to [PicGo](https://www.picgo.net) to obtain the image hosting key.
 ><img width="1701" height="960" alt="workflow (5)" src="https://github.com/user-attachments/assets/ed4b45e1-770e-48f4-a4f9-8b1275ffe83c" />
+>
+> </details>
+### Image Mask Blend
+> Input a background image and an image to be blended, then input the mask of the area in the background image where blending is required. The node will scale and move the layer image based on the size and position of the mask.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="1322" height="1108" alt="workflow (1)" src="https://github.com/user-attachments/assets/73492dc4-1a03-4df2-ab94-cc00d3758132" />
 >
 > </details>
