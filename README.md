@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.8.0 Add API Core Node.
 - V2.7.0 Add Image Mask Blend Node.
 - V2.6.0 Add the Jimeng Image 4.0 node and enhance the functionality of the Text Block node.
 - V2.5.0 Added Baseline Alignment (X) and Baseline Alignment (Y) nodes.
@@ -189,5 +190,16 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > <summary>See More Information</summary>
 >
 ><img width="1322" height="1108" alt="workflow (1)" src="https://github.com/user-attachments/assets/73492dc4-1a03-4df2-ab94-cc00d3758132" />
+>
+> </details>
+### API Core
+> API Core Transfer Node.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Please go to [API Core](https://api.apicore.ai/console/token) to complete the key application.
+> - Please fill in your ComfyUI web address in `server_origin` for uploading reference images. Note that this address must be a public IP address or domain name.
+> - Once you fill in the `api_key`, the node will automatically retrieve available models for you to select.
+><img width="670" height="460" alt="image" src="https://github.com/user-attachments/assets/9006aa94-0765-467f-bf2f-d41f333c5390" />
 >
 > </details>
