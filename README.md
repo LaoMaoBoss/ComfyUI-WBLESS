@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V2.9.0 Update RunningHUB API, API Core-RustFS Node.
 - V2.8.0 Add API Core Node.
 - V2.7.0 Add Image Mask Blend Node.
 - V2.6.0 Add the Jimeng Image 4.0 node and enhance the functionality of the Text Block node.
@@ -201,5 +202,21 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - Please fill in your ComfyUI web address in `server_origin` for uploading reference images. Note that this address must be a public IP address or domain name.
 > - Once you fill in the `api_key`, the node will automatically retrieve available models for you to select.
 ><img width="670" height="460" alt="image" src="https://github.com/user-attachments/assets/9006aa94-0765-467f-bf2f-d41f333c5390" />
+>
+> </details>
+### API Core-RustFS
+> API Core variant that uses RustFS to upload image URLs, and requires self-deployment of RustFS.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="617" height="553" alt="image" src="https://github.com/user-attachments/assets/67002d7c-9443-40f9-a589-92754e37012b" />
+>
+> </details>
+### RunningHUB API
+> RunningHUB API Invocation Node.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="627" height="398" alt="image" src="https://github.com/user-attachments/assets/503f3cc5-a818-4475-9b62-89b72035dd09" />
 >
 > </details>
