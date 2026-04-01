@@ -11,7 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
-- v3.0.0 Add Gemini Chat node.
+- V3.0.0 Add Gemini Chat node.
 - V2.9.0 Update RunningHUB API, API Core-RustFS Node.
 - V2.8.0 Add API Core Node.
 - V2.7.0 Add Image Mask Blend Node.
