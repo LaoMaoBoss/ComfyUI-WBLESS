@@ -1,6 +1,11 @@
 import http.client
 import json
 import logging
+import base64
+import io
+import torch
+import numpy as np
+from PIL import Image
 from cozy_comfyui.node import CozyBaseNode
 
 logger = logging.getLogger(__name__)
@@ -62,13 +67,16 @@ class GeminiChatNode(CozyBaseNode):
                     "max": 131072,
                     "step": 1024
                 }),
+            },
+            "optional": {
+                "image": ("IMAGE", ),
             }
         }
     
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("text", "raw_response")
 
-    def run(self, host, api_key, model, system_instruction, user_input, temperature, top_p, include_thoughts, thinking_budget):
+    def run(self, host, api_key, model, system_instruction, user_input, temperature, top_p, include_thoughts, thinking_budget, image=None):
         # 兼容 ComfyUI 的列表传参
         if isinstance(host, list): host = host[0] if len(host) > 0 else "millionengine.com"
         if isinstance(api_key, list): api_key = api_key[0] if len(api_key) > 0 else ""
@@ -79,11 +87,35 @@ class GeminiChatNode(CozyBaseNode):
         if isinstance(top_p, list): top_p = top_p[0] if len(top_p) > 0 else 1.0
         if isinstance(include_thoughts, list): include_thoughts = include_thoughts[0] if len(include_thoughts) > 0 else True
         if isinstance(thinking_budget, list): thinking_budget = thinking_budget[0] if len(thinking_budget) > 0 else 26240
+        if isinstance(image, list): image = image[0] if len(image) > 0 else None
 
         try:
             logger.info(f"[Gemini Chat] 开始请求 {model} (Host: {host})")
             conn = http.client.HTTPSConnection(host)
             
+            parts = []
+            if image is not None:
+                try:
+                    i = 255. * image.cpu().numpy()
+                    img = Image.fromarray(np.clip(i[0], 0, 255).astype(np.uint8))
+                    buffered = io.BytesIO()
+                    img.save(buffered, format="PNG")
+                    img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                    
+                    parts.append({
+                        "inline_data": {
+                            "mime_type": "image/png",
+                            "data": img_b64
+                        }
+                    })
+                except Exception as e:
+                    logger.error(f"[Gemini Chat] 图像转换失败: {e}")
+
+            if user_input or not parts:
+                parts.append({
+                    "text": user_input
+                })
+
             payload_dict = {
                "systemInstruction": {
                   "parts": [
@@ -95,11 +127,7 @@ class GeminiChatNode(CozyBaseNode):
                "contents": [
                   {
                      "role": "user",
-                     "parts": [
-                        {
-                           "text": user_input
-                        }
-                     ]
+                     "parts": parts
                   }
                ],
                "generationConfig": {
