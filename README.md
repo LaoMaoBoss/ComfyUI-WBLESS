@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V3.1.0 Update DeepSeek API Node.
 - V3.0.1 Update image understanding capabilities.
 - V3.0.0 Add Gemini Chat node.
 - V2.9.0 Update RunningHUB API, API Core-RustFS Node.
@@ -228,5 +229,13 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > <summary>See More Information</summary>
 >
 ><img width="602" height="541" alt="image" src="https://github.com/user-attachments/assets/ec5f37f4-1173-4805-a8f6-f66b87347e29" />
+>
+> </details>
+### DeepSeek Chat
+> DeepSeek API Node.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="670" height="569" alt="image" src="https://github.com/user-attachments/assets/bc0d0f83-aa99-4b5b-8960-7cb4681f0919" />
 >
 > </details>
