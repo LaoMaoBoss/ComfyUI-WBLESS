@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V3.2.0 Update Qwen API Node.
 - V3.1.0 Update DeepSeek API Node.
 - V3.0.1 Update image understanding capabilities.
 - V3.0.0 Add Gemini Chat node.
@@ -237,5 +238,13 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > <summary>See More Information</summary>
 >
 ><img width="670" height="569" alt="image" src="https://github.com/user-attachments/assets/bc0d0f83-aa99-4b5b-8960-7cb4681f0919" />
+>
+> </details>
+### Qwen Chat
+> Qwen API Node.
+> <details>
+> <summary>See More Information</summary>
+>
+><img width="778" height="622" alt="image" src="https://github.com/user-attachments/assets/e477809e-7171-4e89-89f1-c97509f6f689" />
 >
 > </details>
