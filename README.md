@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V3.3.0 Add the RunningHub DeepSeek Chat node and update the DeepSeek Chat node.
 - V3.2.0 Update Qwen API Node.
 - V3.1.0 Update DeepSeek API Node.
 - V3.0.1 Update image understanding capabilities.
@@ -246,5 +247,15 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > <summary>See More Information</summary>
 >
 ><img width="778" height="622" alt="image" src="https://github.com/user-attachments/assets/e477809e-7171-4e89-89f1-c97509f6f689" />
+>
+> </details>
+### RunningHub DeepSeek Chat
+> RunningHub DeepSeek Relay Node.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Please visit [RunningHub](https://www.runninghub.ai/enterprise-api/sharedApi) to apply for an API key.
+> - If you are a user from China, you can set the node’s `base_url` parameter to `https://llm.runninghub.cn/v1` and go to [RunningHub](https://www.runninghub.cn/enterprise-api/sharedApi) to apply for an API key.
+><img width="424" height="474" alt="image" src="https://github.com/user-attachments/assets/178ea5d5-572c-47bd-90f6-33c9708beb9e" />
 >
 > </details>
