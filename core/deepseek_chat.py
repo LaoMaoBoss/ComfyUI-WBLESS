@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 class DeepSeekChatNode(CozyBaseNode):
     """
     DeepSeek Chat
+    对接 DeepSeek V4 Chat Completions API，支持 thinking 模式与 reasoning_effort
     """
     NAME = "DeepSeek Chat"
     FUNCTION = "run"
@@ -22,8 +23,15 @@ class DeepSeekChatNode(CozyBaseNode):
                     "multiline": False,
                     "placeholder": "输入你的 API key (可带或不带 Bearer)"
                 }),
-                "model": (["deepseek-chat", "deepseek-reasoner"], {
-                    "default": "deepseek-chat"
+                "model": (["deepseek-v4-flash", "deepseek-v4-pro"], {
+                    "default": "deepseek-v4-flash"
+                }),
+                # V4 默认开启 thinking；关闭后 temperature / top_p 才生效
+                "thinking": (["enabled", "disabled"], {
+                    "default": "enabled"
+                }),
+                "reasoning_effort": (["low", "high", "max"], {
+                    "default": "high"
                 }),
                 "system_instruction": ("STRING", {
                     "default": "You are a helpful assistant",
@@ -53,10 +61,12 @@ class DeepSeekChatNode(CozyBaseNode):
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("text", "reasoning", "raw_response")
 
-    def run(self, api_key, model, system_instruction, user_input, temperature, top_p):
+    def run(self, api_key, model, thinking, reasoning_effort, system_instruction, user_input, temperature, top_p):
         # 兼容 ComfyUI 的列表传参
         if isinstance(api_key, list): api_key = api_key[0] if len(api_key) > 0 else ""
-        if isinstance(model, list): model = model[0] if len(model) > 0 else "deepseek-chat"
+        if isinstance(model, list): model = model[0] if len(model) > 0 else "deepseek-v4-flash"
+        if isinstance(thinking, list): thinking = thinking[0] if len(thinking) > 0 else "enabled"
+        if isinstance(reasoning_effort, list): reasoning_effort = reasoning_effort[0] if len(reasoning_effort) > 0 else "high"
         if isinstance(system_instruction, list): system_instruction = system_instruction[0] if len(system_instruction) > 0 else ""
         if isinstance(user_input, list): user_input = user_input[0] if len(user_input) > 0 else ""
         if isinstance(temperature, list): temperature = temperature[0] if len(temperature) > 0 else 1.0
@@ -65,7 +75,7 @@ class DeepSeekChatNode(CozyBaseNode):
         endpoint = "https://api.deepseek.com/chat/completions"
 
         try:
-            logger.info(f"[DeepSeek Chat] 开始请求 {model} (URL: {endpoint})")
+            logger.info(f"[DeepSeek Chat] 开始请求 {model} thinking={thinking} effort={reasoning_effort} (URL: {endpoint})")
             
             messages = []
             if system_instruction:
@@ -80,13 +90,19 @@ class DeepSeekChatNode(CozyBaseNode):
                     "content": user_input
                 })
 
+            # 直连 REST：thinking 作为 body 字段（对应 OpenAI SDK 的 extra_body）
             payload_dict = {
                 "model": model,
                 "messages": messages,
-                "temperature": temperature,
-                "top_p": top_p,
-                "stream": False
+                "stream": False,
+                "thinking": {"type": thinking},
+                "reasoning_effort": reasoning_effort,
             }
+
+            # thinking 模式下 temperature / top_p 会被忽略；仅在 disabled 时写入
+            if thinking == "disabled":
+                payload_dict["temperature"] = temperature
+                payload_dict["top_p"] = top_p
             
             payload = json.dumps(payload_dict).encode("utf-8")
             
@@ -114,8 +130,8 @@ class DeepSeekChatNode(CozyBaseNode):
                 resp_json = json.loads(raw_text)
                 if "choices" in resp_json and len(resp_json["choices"]) > 0:
                     message = resp_json["choices"][0].get("message", {})
-                    result_text = message.get("content", "")
-                    reasoning_text = message.get("reasoning_content", "")
+                    result_text = message.get("content", "") or ""
+                    reasoning_text = message.get("reasoning_content", "") or ""
                 else:
                     if "error" in resp_json:
                         result_text = f"API 报错: {resp_json['error'].get('message', '未知错误')}"
