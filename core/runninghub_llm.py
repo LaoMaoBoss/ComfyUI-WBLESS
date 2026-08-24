@@ -1,13 +1,19 @@
 """
 RunningHUB LLM 节点
 通过 RunningHub OpenAI 兼容接口调用多厂商模型（DeepSeek / Gemini / Doubao 等）
+支持可选图片输入（OpenAI Vision 兼容的 Base64 data URL）
 """
 
+import base64
 import json
 import logging
 import ssl
 import urllib.error
 import urllib.request
+from io import BytesIO
+
+import numpy as np
+from PIL import Image
 
 from cozy_comfyui.node import CozyBaseNode
 
@@ -86,7 +92,7 @@ MODEL_CHOICES = [
 class RunningHubLlmNode(CozyBaseNode):
     """
     RunningHUB LLM
-    对接 RunningHub LLM Chat Completions API，支持多模型与 reasoning_effort
+    对接 RunningHub LLM Chat Completions API，支持多模型、reasoning_effort 与单图视觉输入
     """
 
     NAME = "RunningHUB LLM"
@@ -159,7 +165,11 @@ class RunningHubLlmNode(CozyBaseNode):
                     "max": 2.0,
                     "step": 0.1
                 }),
-            }
+            },
+            "optional": {
+                # 视觉模型通过 OpenAI 兼容的 image_url（Base64 data URL）传图
+                "image": ("IMAGE",),
+            },
         }
 
     RETURN_TYPES = ("STRING", "STRING", "STRING")
@@ -180,6 +190,54 @@ class RunningHubLlmNode(CozyBaseNode):
             return url
         return f"{url}/chat/completions"
 
+    def _image_to_data_url(self, image_tensor):
+        # ComfyUI IMAGE → JPEG Base64 data URL，供 Vision 模型直接内联读取
+        if isinstance(image_tensor, list) and image_tensor:
+            image_tensor = image_tensor[0]
+
+        if len(image_tensor.shape) == 4:
+            image_tensor = image_tensor.squeeze(0)
+
+        image_np = (image_tensor.cpu().numpy() * 255).astype(np.uint8)
+        image_pil = Image.fromarray(image_np)
+
+        if image_pil.mode == "RGBA":
+            background = Image.new("RGB", image_pil.size, (255, 255, 255))
+            background.paste(image_pil, mask=image_pil.split()[-1])
+            image_pil = background
+        elif image_pil.mode != "RGB":
+            image_pil = image_pil.convert("RGB")
+
+        buffer = BytesIO()
+        image_pil.save(buffer, format="JPEG", quality=95)
+        image_b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        return f"data:image/jpeg;base64,{image_b64}"
+
+    def _build_messages(self, system_instruction, user_input, image=None):
+        messages = []
+        if system_instruction:
+            messages.append({
+                "role": "system",
+                "content": system_instruction
+            })
+
+        if image is not None:
+            content = []
+            if user_input:
+                content.append({"type": "text", "text": user_input})
+            content.append({
+                "type": "image_url",
+                "image_url": {"url": self._image_to_data_url(image)},
+            })
+            messages.append({"role": "user", "content": content})
+        elif user_input:
+            messages.append({
+                "role": "user",
+                "content": user_input
+            })
+
+        return messages
+
     def run(
         self,
         api_key,
@@ -194,6 +252,7 @@ class RunningHubLlmNode(CozyBaseNode):
         top_p,
         presence_penalty,
         frequency_penalty,
+        image=None,
     ):
         api_key = str(self._extract_param(api_key, ""))
         base_url = str(self._extract_param(base_url, DEFAULT_BASE_URL)).strip()
@@ -210,6 +269,8 @@ class RunningHubLlmNode(CozyBaseNode):
         top_p = float(self._extract_param(top_p, 1.0))
         presence_penalty = float(self._extract_param(presence_penalty, 0.0))
         frequency_penalty = float(self._extract_param(frequency_penalty, 0.0))
+        if isinstance(image, list):
+            image = image[0] if image else None
 
         if not api_key:
             raise ValueError("请提供有效的 RunningHub API Key")
@@ -217,22 +278,11 @@ class RunningHubLlmNode(CozyBaseNode):
         if not base_url:
             raise ValueError("请提供有效的 base_url")
 
-        if not user_input and not system_instruction:
-            raise ValueError("请提供系统提示词或用户输入")
+        if not user_input and not system_instruction and image is None:
+            raise ValueError("请提供系统提示词、用户输入或图片")
 
         endpoint = self._build_chat_completions_url(base_url)
-
-        messages = []
-        if system_instruction:
-            messages.append({
-                "role": "system",
-                "content": system_instruction
-            })
-        if user_input:
-            messages.append({
-                "role": "user",
-                "content": user_input
-            })
+        messages = self._build_messages(system_instruction, user_input, image)
 
         # 与官方 OpenAI SDK 示例对齐；reasoning_effort 对应 extra_body
         payload_dict = {
@@ -248,9 +298,10 @@ class RunningHubLlmNode(CozyBaseNode):
         }
 
         try:
+            has_image = image is not None
             logger.info(
                 f"[RunningHUB LLM] 开始请求 {model} "
-                f"effort={reasoning_effort} (URL: {endpoint})"
+                f"effort={reasoning_effort} has_image={has_image} (URL: {endpoint})"
             )
 
             payload = json.dumps(payload_dict).encode("utf-8")
