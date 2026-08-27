@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V3.4.3 Fix Python 3.13/Lexicon loading, loguru fallback, and Jimeng SDK import errors.
 - V3.4.2 RunningHUB LLM node supports multiple image inputs.
 - V3.4.1 RunningHub LLM node adds image input.
 - V3.4.0 Add RunningHUB LLM Node.
