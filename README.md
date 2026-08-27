@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V3.4.2 RunningHUB LLM node supports multiple image inputs.
 - V3.4.1 RunningHub LLM node adds image input.
 - V3.4.0 Add RunningHUB LLM Node.
 - V3.3.0 Add the RunningHub DeepSeek Chat node and update the DeepSeek Chat node.
@@ -268,6 +269,6 @@ ComfyUI custom node package. This custom node features multiple practical functi
 >
 > - Please visit [RunningHub](https://www.runninghub.ai/enterprise-api/sharedApi) to apply for an API key.
 > - If you are a user from China, you can set the node’s `base_url` parameter to `https://llm.runninghub.cn/v1` and go to [RunningHub](https://www.runninghub.cn/enterprise-api/sharedApi) to apply for an API key.
-><img width="407" height="455" alt="image" src="https://github.com/user-attachments/assets/77b60694-4754-4562-a9c3-45fcd7973ffb" />
+><img width="504" height="590" alt="image" src="https://github.com/user-attachments/assets/c642b446-e48e-49cb-a928-b78abdb7540c" />
 >
 > </details>
