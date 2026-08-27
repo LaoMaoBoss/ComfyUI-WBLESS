@@ -52,11 +52,35 @@ _LOADED = {}
 # === SUPPORT ===
 # ==============================================================================
 
+def _resolve_module_route(root: str, name: str) -> str:
+    """
+    从文件路径推导 import 路由（如 core/foo.py -> core.foo）。
+
+    glob 在不同环境可能返回相对或绝对路径，Windows 下还存在盘符/大小写差异，
+    不能依赖单一的 split(f"{root}/")[1]。
+    """
+    name_norm = name.replace("\\", "/")
+    root_norm = root.rstrip("/").replace("\\", "/")
+    prefix = f"{root_norm}/"
+
+    if name_norm.startswith(prefix):
+        route = name_norm[len(prefix):]
+    elif name_norm.lower().startswith(prefix.lower()):
+        # Windows 路径大小写不一致时仍应能匹配
+        route = name_norm[len(prefix):]
+    elif "/" in name_norm and not Path(name_norm).is_absolute():
+        # glob 相对路径，例如 core/runninghub_llm.py
+        route = name_norm
+    else:
+        raise ValueError(f"cannot resolve module route from {name!r} under {root!r}")
+
+    return route.split(".")[0].replace("/", ".")
+
+
 def load_module(root:str, name: str) -> None|ModuleType:
     root_module = root.split("/")[-1]
     try:
-        route = name.split(f"{root}/")[1]
-        route = route.split('.')[0].replace('/', '.')
+        route = _resolve_module_route(root, name)
         module = f"{root_module}.{route}"
     except Exception as e:
         logger.warning(f"module failed {name}")
@@ -97,7 +121,9 @@ def loader(root_str: str, pack: str, directory: str='',
         if fname.stem.startswith('_'):
             continue
 
-        fname = str(fname).replace("\\", "/")
+        # 统一为绝对路径，避免 glob 返回相对路径导致 load_module 解析失败
+        fpath = fname if fname.is_absolute() else root / fname
+        fname = str(fpath.resolve()).replace("\\", "/")
         if (module := load_module(root_str, fname)) is None:
             continue
 
