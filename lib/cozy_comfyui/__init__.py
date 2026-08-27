@@ -2,13 +2,13 @@
 
 __version__ = "0.0.41"
 
+import logging
 import os
 import sys
 import json
 from enum import Enum
 from typing import Any, Generator, Optional, TypeAlias
 
-from loguru import logger as loguru_logger
 import torch
 
 # ==============================================================================
@@ -23,20 +23,73 @@ InputType: TypeAlias = dict[str, Any]
 # === CONSTANT ===
 # ==============================================================================
 
-logger = loguru_logger.bind(cozy=True)
-has_cozy_handler = any(
-    "cozy" in h.filter_.__code__.co_code
-    for h in loguru_logger._core.handlers.values()
-    if hasattr(h, 'filter_') and h.filter_ is not None
-)
+class _CozyStdLogger:
+    """loguru 不可用时的标准库 logging 兼容层（便携版 ComfyUI 常未预装 loguru）。"""
 
-if not has_cozy_handler:
-    loguru_logger.add(
-        sys.stdout,
-        level=os.getenv("COZY_LOG_LEVEL", "INFO"),
-        filter=lambda record: "cozy" in record["extra"],
-        enqueue=True
-)
+    _configured = False
+
+    def __init__(self, name: str = "cozy_comfyui"):
+        self._logger = logging.getLogger(name)
+
+    @classmethod
+    def _ensure_configured(cls) -> None:
+        if cls._configured:
+            return
+
+        level_name = os.getenv("COZY_LOG_LEVEL", "INFO").upper()
+        level = getattr(logging, level_name, logging.INFO)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(
+            "%(asctime)s.%(msecs)03d | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        ))
+
+        root = logging.getLogger("cozy_comfyui")
+        root.setLevel(level)
+        if not root.handlers:
+            root.addHandler(handler)
+        root.propagate = False
+        cls._configured = True
+
+    def bind(self, **_kwargs):
+        self._ensure_configured()
+        return self
+
+    def info(self, message, *args, **kwargs):
+        self._logger.info(message, *args, **kwargs)
+
+    def warning(self, message, *args, **kwargs):
+        self._logger.warning(message, *args, **kwargs)
+
+    def error(self, message, *args, **kwargs):
+        self._logger.error(message, *args, **kwargs)
+
+    def debug(self, message, *args, **kwargs):
+        self._logger.debug(message, *args, **kwargs)
+
+    def exception(self, message, *args, **kwargs):
+        self._logger.exception(message, *args, **kwargs)
+
+
+try:
+    from loguru import logger as loguru_logger
+
+    logger = loguru_logger.bind(cozy=True)
+    has_cozy_handler = any(
+        "cozy" in h.filter_.__code__.co_code
+        for h in loguru_logger._core.handlers.values()
+        if hasattr(h, 'filter_') and h.filter_ is not None
+    )
+
+    if not has_cozy_handler:
+        loguru_logger.add(
+            sys.stdout,
+            level=os.getenv("COZY_LOG_LEVEL", "INFO"),
+            filter=lambda record: "cozy" in record["extra"],
+            enqueue=True
+        )
+except ImportError:
+    logger = _CozyStdLogger().bind(cozy=True)
 
 COZY_INTERNAL = os.getenv("COZY_INTERNAL", 'false').strip().lower() in ('true', '1', 't')
 

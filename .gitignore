@@ -1,0 +1,195 @@
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pyo
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Packaging / build
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+pip-wheel-metadata/
+share/python-wheels/
+wheels/
+*.whl
+MANIFEST
+
+# Test / coverage / type checking
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.pyre/
+.dmypy.json
+dmypy.json
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+nosetests.xml
+*.cover
+*.py,cover
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# =============================================================================
+# ComfyUI / WBLESS project artifacts
+# =============================================================================
+# Generated when COZY_INTERNAL=true during local development
+node_list.json
+
+# Local ComfyUI workflow / output (if testing inside or beside this repo)
+output/
+outputs/
+input/
+temp/
+tmp/
+test_output/
+test_outputs/
+workflows/local/
+*.cflow
+
+# =============================================================================
+# Secrets & local configuration
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+credentials.json
+config.local.*
+*.local.json
+*.local.yaml
+*.local.yml
+*.local.toml
+
+# API keys sometimes saved by mistake
+*_api_key*
+*_secret_key*
+*.token
+
+# =============================================================================
+# Logs & debug
+# =============================================================================
+*.log
+logs/
+log/
+*.stackdump
+*.dump
+
+# =============================================================================
+# OS generated files
+# =============================================================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Editors & IDEs
+# =============================================================================
+# VS Code / Cursor (keep shared project rules)
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.cursor/
+!.cursor/rules/
+!.cursor/rules/**
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipw
+out/
+
+# Sublime / Vim / Emacs
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.swn
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# =============================================================================
+# Node.js (if frontend tooling is added later)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# =============================================================================
+# AI / assistant local state
+# =============================================================================
+.aider*
+.claude/
+.continue/
+
+# =============================================================================
+# Misc temporary / backup files
+# =============================================================================
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.tmp
+*.temp
+*.partial

@@ -6,21 +6,24 @@ class LexiconMeta(type):
     def __new__(cls, name, bases, dct) -> object:
         _tooltips = {}
         for attr_name, attr_value in dct.items():
-            if isinstance(attr_value, tuple):
-                attr_name = attr_value[1]
-                attr_value = attr_value[0]
-            _tooltips[attr_value] = attr_name
+            # Python 3.13+ 会在类 dict 中注入 __static_attributes__=() 等元组，
+            # 不能按 Lexicon 词条 (key, tooltip) 的两元素格式盲目解析。
+            if not isinstance(attr_value, tuple) or len(attr_value) < 2:
+                continue
+            tooltip_key = attr_value[0]
+            tooltip_label = attr_value[1]
+            _tooltips[tooltip_key] = tooltip_label
         dct["_tooltipsDB"] = _tooltips
         return super().__new__(cls, name, bases, dct)
 
     def __getattribute__(cls, name) -> Any | None:
         parts = name.split(".")
         value = super().__getattribute__(parts[0])
-        if type(value) == tuple:
+        if isinstance(value, tuple) and len(value) > 0:
             try:
                 idx = int(parts[-1])
                 value = value[idx]
-            except:
+            except Exception:
                 value = value[0]
         return value
 

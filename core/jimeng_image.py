@@ -29,21 +29,39 @@ if VOLCENGINE_LIB_PATH.exists():
 # 尝试导入火山引擎SDK
 SDK_AVAILABLE = False
 VisualService = None
+SDK_IMPORT_ERROR = ""
 
-try:
-    from volcengine.visual.VisualService import VisualService
-    SDK_AVAILABLE = True
-    print("[Jimeng Image 4.0] 火山引擎SDK已加载（本地版本）")
-except ImportError:
-    try:
-        # 尝试从系统安装的包导入
-        import volcengine.visual.VisualService
-        from volcengine.visual.VisualService import VisualService
-        SDK_AVAILABLE = True
-        print("[Jimeng Image 4.0] 火山引擎SDK已加载（系统版本）")
-    except ImportError:
-        print("[Jimeng Image 4.0] 火山引擎SDK未找到")
-        print("[Jimeng Image 4.0] 请将volcengine包放入 lib/ 目录，或运行: pip install volcengine")
+def _try_import_visual_service():
+    """依次尝试本地 lib 与系统 site-packages 中的 VisualService。"""
+    global VisualService, SDK_IMPORT_ERROR
+
+    attempts = (
+        ("本地 lib", lambda: __import__("volcengine.visual.VisualService", fromlist=["VisualService"]).VisualService),
+        ("系统包", lambda: __import__("volcengine.visual.VisualService", fromlist=["VisualService"]).VisualService),
+    )
+    last_error = None
+
+    for source, loader in attempts:
+        try:
+            VisualService = loader()
+            SDK_IMPORT_ERROR = ""
+            print(f"[Jimeng Image 4.0] 火山引擎SDK已加载（{source}）")
+            return True
+        except ImportError as e:
+            last_error = e
+            SDK_IMPORT_ERROR = str(e)
+
+    print("[Jimeng Image 4.0] 火山引擎SDK导入失败")
+    if SDK_IMPORT_ERROR:
+        print(f"[Jimeng Image 4.0] 原因: {SDK_IMPORT_ERROR}")
+    if "pytz" in SDK_IMPORT_ERROR:
+        print("[Jimeng Image 4.0] 缺少依赖 pytz，请在 ComfyUI 的 Python 中执行:")
+        print("[Jimeng Image 4.0]   python -m pip install pytz")
+    else:
+        print("[Jimeng Image 4.0] 请将 volcengine 包放入 lib/ 目录，或运行: pip install volcengine pytz")
+    return False
+
+SDK_AVAILABLE = _try_import_visual_service()
 
 # 导入 cozy_comfyui 工具
 from cozy_comfyui.node import CozyBaseNode, COZY_TYPE_ANY
