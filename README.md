@@ -285,6 +285,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
 > - `resolution` (`1k` / `2k` / `4k`) decides the actual pixel size, while `quality` (`low` / `medium` / `high`) trades speed for fidelity.
 > - Reference images must be public `http(s)` URLs, so local ComfyUI images are uploaded to the ToAPIs `/v1/uploads/images` endpoint automatically. Each file is limited to 10MB, and an oversized PNG falls back to JPEG.
 > - The generation interface is asynchronous. The node submits a task and then polls it, so `timeout` and `poll_interval` control the total wait and the polling cadence.
->
+><img width="471" height="493" alt="image" src="https://github.com/user-attachments/assets/e60d0e3d-0134-4719-9829-3df81098fafb" />
+> 
 > </details>
 
