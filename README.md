@@ -11,6 +11,7 @@ ComfyUI custom node package. This custom node features multiple practical functi
    ```
 - Start up ComfyUI.
 # NOTICE
+- V3.5.0 Add the ToAPIs GPT Image 2 VIP node.
 - V3.4.2 RunningHUB LLM node supports multiple image inputs.
 - V3.4.1 RunningHub LLM node adds image input.
 - V3.4.0 Add RunningHUB LLM Node.
@@ -272,3 +273,17 @@ ComfyUI custom node package. This custom node features multiple practical functi
 ><img width="504" height="590" alt="image" src="https://github.com/user-attachments/assets/c642b446-e48e-49cb-a928-b78abdb7540c" />
 >
 > </details>
+### ToAPIs GPT Image 2 VIP
+> ToAPIs GPT Image 2 VIP image generation node. Supports text-to-image, single-reference and multi-reference image-to-image.
+> <details>
+> <summary>See More Information</summary>
+>
+> - Please go to [ToAPIs](https://toapis.com/console/token) to apply for an API key. The `api_key` field can be left empty if the `TOAPIS_API_KEY` environment variable is set.
+> - `api_base` defaults to `https://toapis.com`. Users in mainland China should change it to `https://toapis.cn`.
+> - The `size` list covers every preset ratio (`1:1`, `3:2`, `2:3`, `4:3`, `3:4`, `5:4`, `4:5`, `16:9`, `9:16`, `2:1`, `1:2`, `21:9`, `9:21`, plus `auto`). For an arbitrary ratio such as `7:4` or `1:3`, fill in `custom_size`; it overrides the preset and must stay within a 3:1 aspect ratio.
+> - `resolution` (`1k` / `2k` / `4k`) decides the actual pixel size, while `quality` (`low` / `medium` / `high`) trades speed for fidelity.
+> - Reference images must be public `http(s)` URLs, so local ComfyUI images are uploaded to the ToAPIs `/v1/uploads/images` endpoint automatically. Each file is limited to 10MB, and an oversized PNG falls back to JPEG.
+> - The generation interface is asynchronous. The node submits a task and then polls it, so `timeout` and `poll_interval` control the total wait and the polling cadence.
+>
+> </details>
+
